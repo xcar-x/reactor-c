@@ -275,8 +275,11 @@ int process_args(int argc, const char* argv[]) {
   return 1;
 }
 int main(int argc, const char* argv[]) {
+  lf_print("Lingua Franca RTI starting up.");
   initialize_lf_thread_id();
+  lf_print("initialize_lf_thread_id() complete.");
   initialize_RTI(&rti);
+  lf_print("initialize_RTI() complete.");
 
   // Catch the Ctrl-C signal, for a clean exit that does not lose the trace information
   signal(SIGINT, exit);

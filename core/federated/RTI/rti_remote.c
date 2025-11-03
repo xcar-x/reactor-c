@@ -1050,6 +1050,7 @@ static int32_t receive_and_check_fed_id_message(int* socket_id) {
   size_t length = 1 + sizeof(uint16_t) + 1; // Message ID, federate ID, length of fedration ID.
   unsigned char buffer[length];
 
+  lf_print("RTI waiting to receive MSG_TYPE_FED_IDS message.");
   // Read bytes from the socket. We need 4 bytes.
   if (read_from_socket_close_on_error(socket_id, length, buffer)) {
     lf_print_error("RTI failed to read from accepted socket.");
@@ -1057,7 +1058,7 @@ static int32_t receive_and_check_fed_id_message(int* socket_id) {
   }
 
   uint16_t fed_id = rti_remote->base.number_of_scheduling_nodes; // Initialize to an invalid value.
-
+  lf_print("RTI: Expected federate ID: %d", fed_id);
   // First byte received is the message type.
   if (buffer[0] != MSG_TYPE_FED_IDS) {
     if (rti_remote->base.tracing_enabled) {
@@ -1412,6 +1413,7 @@ static bool authenticate_federate(int* socket) {
 #endif
 
 void lf_connect_to_federates(int socket_descriptor) {
+  lf_print("RTI: lf_connect_to_federates. Number of federates: %d", rti_remote->base.number_of_scheduling_nodes);
   for (int i = 0; i < rti_remote->base.number_of_scheduling_nodes; i++) {
     int socket_id = accept_rti_socket(rti_remote->socket_descriptor_TCP);
 // Wait for the first message from the federate when RTI -a option is on.
@@ -1443,6 +1445,7 @@ void lf_connect_to_federates(int socket_descriptor) {
       lf_thread_create(&(fed->thread_id), federate_info_thread_TCP, fed);
     } else {
       // Received message was rejected. Try again.
+      lf_print("RTI: Received message was rejected. Try again.");
       i--;
     }
   }
@@ -1527,6 +1530,7 @@ int32_t start_rti_server(uint16_t port) {
 
 void wait_for_federates(int socket_descriptor) {
   // Wait for connections from federates and create a thread for each.
+  lf_print("RTI: Waiting for federates to connect.");
   lf_connect_to_federates(socket_descriptor);
 
   // All federates have connected.
